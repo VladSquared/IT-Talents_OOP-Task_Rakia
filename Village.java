@@ -1,5 +1,11 @@
 package rakia;
 
+import com.google.gson.Gson;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -44,7 +50,7 @@ public class Village {
 
     public void startProducingRakia() {
         for (int i = 0; i < 5; i++) {
-            Tank tank = new Tank(this, "Tank-" + (i + 1));
+            Tank tank = new Tank(this, "rakia.Tank-" + (i + 1));
             tanks.add(tank);
         }
 
@@ -109,12 +115,20 @@ public class Village {
     }
 
     private void printStatistics() {
+        int refreshPrintRate = 3000;
+        File f = new File("statistics");
+        f.mkdir();
+        int counterFiles = 1;
+
         while (true) {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(refreshPrintRate);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            File file = new File("statistics/" + counterFiles + "_after_" + refreshPrintRate*counterFiles/1000 + "_seconds.txt");
+            counterFiles++;
 
             Fruits mostOfFruit = Fruits.values()[0];
             for (Fruits fruit : Fruits.values()) {
@@ -122,8 +136,6 @@ public class Village {
                     mostOfFruit = fruit;
                 }
             }
-            System.out.println("----------");
-            System.out.println("The most is collected from " + mostOfFruit + " - " + mostOfFruit.getTotalCollected() + " kilograms");
 
             Fruits mostOfRakia = Fruits.values()[0];
             for (Fruits fruit : Fruits.values()) {
@@ -131,11 +143,15 @@ public class Village {
                     mostOfRakia = fruit;
                 }
             }
-            System.out.println("The most is produced from " + mostOfRakia + " RAKIA - " + String.format("%.2f", mostOfRakia.getLiters()) + " Liters");
 
-            System.out.println("The Grape / Apricot ratio is: " + String.format("%.2f", Fruits.GRAPE.getLiters() / Fruits.APRICOT.getLiters()));
-
-            System.out.println("----------");
+            try {
+                PrintStream ps = new PrintStream(file);
+                ps.println("The most is collected from " + mostOfFruit + " - " + mostOfFruit.getTotalCollected() + " kilograms");
+                ps.println("The most is produced from " + mostOfRakia + " RAKIA - " + String.format("%.2f", mostOfRakia.getLiters()) + " Liters");
+                ps.println("The Grape / Apricot ratio is: " + String.format("%.2f", Fruits.GRAPE.getLiters() / Fruits.APRICOT.getLiters()));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
